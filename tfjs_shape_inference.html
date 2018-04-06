@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>원,네모,세모</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.6.1"></script>
+    <style>
+        button {
+            font-size: 16pt;
+        }
+
+        button.bg-1{
+            background-color: tomato;
+        }
+
+        button.bg-2{
+            background-color: chartreuse;
+        }
+
+        div.black-canvas{
+            float:left;
+            width: 280px;
+        }
+
+        div.button-area{
+            float:left;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-align: center;
+        }
+        div.result-area{
+            display: inline-block;
+            width: 280px;
+            height: 280px;
+            background-color: chartreuse;
+            font-size:24pt;
+        }
+
+
+    </style>
+</head>
+<body>
+<h2>검정 캔버스에 원, 네모, 세모 중에 하나를 그려보세요</h2>
+<div>
+    <div class="black-canvas">
+        <canvas width="280" height="280" style="background-color: black;" id="canvas"></canvas>
+    </div>
+    <div class="button-area">
+        <button class="bg-1" onclick="clearArea()">초기화</button>
+        <br/><br/>
+        <button class="bg-2" onclick="predict()">예측하기</button>
+        <br/><br/>
+        <canvas width="28" height="28" style="background-color: black;" id="input_canvas"></canvas>
+    </div>
+    <div class="result-area" id="prediction-result"></div>
+</div>
+
+<script type="text/javascript">
+
+var canvas = document.getElementById('canvas');
+var input_canvas = document.getElementById('input_canvas');
+var prediction_result = document.getElementById('prediction-result');
+
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d')
+    , img = new Image()
+    , f = document.getElementById("uploadimage").files[0]
+    , url = window.URL || window.webkitURL
+    , src = url.createObjectURL(f);
+
+  img.src = src;
+  img.onload = function(){
+    ctx.drawImage(img,0,0);
+    url.revokeObjectURL(src);
+  }
+}
+
+
+var mousePressed = false;
+var lastX, lastY;
+var ctx, input_ctx;
+
+
+$(function(){
+    InitThis();
+});
+
+function InitThis() {
+    ctx = document.getElementById('canvas').getContext("2d");
+
+    $('#canvas').mousedown(function (e) {
+        mousePressed = true;
+        Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, false);
+    });
+
+    $('#canvas').mousemove(function (e) {
+        if (mousePressed) {
+            Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, true);
+        }
+    });
+
+    $('#canvas').mouseup(function (e) {
+        mousePressed = false;
+    });
+	    $('#canvas').mouseleave(function (e) {
+        mousePressed = false;
+    });
+}
+
+function Draw(x, y, isDown) {
+    if (isDown) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 10;
+        ctx.lineJoin = "round";
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+    lastX = x; lastY = y;
+}
+
+function clearArea() {
+    // Use the identity matrix while clearing the canvas
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    input_ctx.setTransform(1,0,0,1,0,0);
+    input_ctx.clearRect(0,0,input_ctx.canvas.width, input_ctx.canvas.height);
+    prediction_result.innerHTML = ''
+}
+
+function makeArray(image_data) {
+    var arr = new Array();
+    arr[0] = new Array();
+    var idx1 = 0;
+    var c = 0;
+
+    for (var i=0; i<image_data.data.length; i+=4){
+        if(c==0) {
+            arr[0][idx1] = new Array();
+        }
+        arr[0][idx1][c] = new Array();
+        arr[0][idx1][c][0]  = (image_data.data[i] + image_data.data[i+1] + image_data.data[i+2])/3;
+        c++;
+
+        if(c==28) {
+            idx1++;
+            c = 0
+        }
+    }
+    return arr;
+}
+
+var model;
+
+async function predict() {
+
+    input_ctx = input_canvas.getContext("2d");
+    input_ctx.drawImage(canvas,0,0,280,280,0,0,28,28);
+
+    var image = new Image();
+    image.src = input_canvas.toDataURL("image/jpeg");
+
+    var image_data = input_ctx.getImageData(0,0,28,28);
+
+    var arrForTensor = makeArray(image_data);
+
+    if (model == undefined) {
+        model = await tf.loadModel('./model.json');
+    }
+    const prediction = model.predict(tf.tensor4d(arrForTensor));
+
+    prediction.data().then(function (result) {
+        var result_txt = "Oops..";
+        if (result[0]==1) {
+            result_txt = "THIS IS A CIRCLE!";
+        }else if (result[1]==1) {
+            result_txt = "THIS IS A RECTANGLE!";
+        }else if (result[2]==1) {
+            result_txt = "THIS IS A TRIANGLE!"
+        }
+        prediction_result.innerText = result_txt;
+    });
+}
+
+
+</script>
+
+</body>
+
+</html>
