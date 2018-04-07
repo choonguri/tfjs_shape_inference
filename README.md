@@ -1,7 +1,17 @@
+
+
+
+
 # Shape Classifier using TensorFlow.
 ## TensorFlow.js를 이용한 간단한 도형분류기 웹앱
 TensorFlow.js를 이용하여 도형(원,삼각형,사각형)을 분류(inference)하는 웹어플리케이션 예제 소스입니다.
 이게 실제 어떻게 돌아가느냐 눈으로 확인하고 싶어서 정말 간단하게 구현한 것이니 참고 부탁드립니다.;-)
+
+## 빠르게 이용하기 ( 웹 서버 열기 )
+1. `npm install`
+2. `npm start`
+3. http://localhost:3000 접속
+
 
 ## 간단 설명
 1. 도형(원,삼각형,사각형) 이미지를 Keras로 학습하여 만든 모델을 TensorFlow.js에서 사용할 수 있게 아래와 같이 모델을 json파일로 저장하는 코드를 한줄 넣어줍니다.(자세한건 https://js.tensorflow.org/tutorials/import-keras.html 여기 참고하세요)
