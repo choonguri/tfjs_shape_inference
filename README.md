@@ -24,8 +24,8 @@ tfjs.converters.save_keras_model(model, tfjs_target_dir)
 5. 무지 간단한 예제이지만 이제 서버사이드에서 추론하지 않고 클라이언트(브라우저)에서 추론할 수 있는 간단한 딥러닝 웹앱이 만들어졌습니다.ㅎ
 6. 참고로! 로컬에서 돌려보려면 간단한 웹서버 하나 띄우고 웹브라우저의 CORS(Cross-origin resource sharing)를 허용해야 데모를 확인할 수 있습니다.
 
-![circle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/images/circle.png)
+![circle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/public/images/circle.png)
 
-![rectangle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/images/rectangle.png)
+![rectangle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/public/images/rectangle.png)
 
-![triangle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/images/triangle.png)
+![triangle](https://raw.githubusercontent.com/choonguri/tfjs_shape_inference/master/public/images/triangle.png)
