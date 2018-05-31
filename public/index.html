@@ -84,6 +84,7 @@ var ctx, input_ctx;
 
 $(function(){
     InitThis();
+    loadModel();
 });
 
 function InitThis() {
@@ -153,25 +154,34 @@ function makeArray(image_data) {
     return arr;
 }
 
-var model;
-
-async function predict() {
-
+function getImageData() {
     input_ctx = input_canvas.getContext("2d");
     input_ctx.drawImage(canvas,0,0,280,280,0,0,28,28);
 
     var image = new Image();
     image.src = input_canvas.toDataURL("image/jpeg");
 
-    var image_data = input_ctx.getImageData(0,0,28,28);
+    return input_ctx.getImageData(0,0,28,28);
+}
+
+var model;
+
+async function loadModel() {
+    model = await tf.loadModel('./model.json');
+}
+
+async function predict() {
+    var image_data = getImageData();
 
     var arrForTensor = makeArray(image_data);
 
-    if (model == undefined) {
-        model = await tf.loadModel('./model.json');
-    }
     const prediction = model.predict(tf.tensor4d(arrForTensor));
 
+    generateResult(prediction);
+
+}
+
+function generateResult(prediction) {
     prediction.data().then(function (result) {
         var result_txt = "Oops..";
         if (result[0]==1) {
@@ -184,7 +194,6 @@ async function predict() {
         prediction_result.innerText = result_txt;
     });
 }
-
 
 </script>
 
